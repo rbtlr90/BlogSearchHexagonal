@@ -6,6 +6,8 @@ import com.regex.blogsearch.application.port.keyword.KeywordOutboundPort;
 import com.regex.blogsearch.types.BlogSortType;
 import com.regex.blogsearch.domain.keyword.Keyword;
 import lombok.RequiredArgsConstructor;
+
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class BlogSearchService implements BlogSearchUsecase {
     };
 
     @Transactional
+    @Synchronized
     private void updateSearchCount(String query) {
         Keyword keyword = this.keywordOutboundPort.findByKeyword(query)
                 .orElseGet(() -> Keyword.builder().

@@ -37,6 +37,7 @@ public class KeywordService implements KeywordUsecase {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     private List<Keyword> getKeywordList(int page, int size, Sort sort) {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Keyword> keywords = this.keywordOutboundPort.findAll(pageable);

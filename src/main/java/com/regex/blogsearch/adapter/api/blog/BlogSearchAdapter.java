@@ -3,6 +3,7 @@ package com.regex.blogsearch.adapter.api.blog;
 
 import com.regex.blogsearch.application.port.blog.BlogSearchOutboundPort;
 import com.regex.blogsearch.types.BlogSortType;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,9 @@ public class BlogSearchAdapter implements BlogSearchOutboundPort {
                     statusCode = (HttpStatus)  httpException.getStatusCode();
                 }
                 assert statusCode != null;
+                if (statusCode == HttpStatus.BAD_REQUEST) {
+                    throw new ConstraintViolationException(naverRestException.getMessage(), null);
+                }
                 throw new HttpClientErrorException(statusCode, naverRestException.getMessage());
             }
         }
