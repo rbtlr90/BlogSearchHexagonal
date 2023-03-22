@@ -3,6 +3,7 @@ package com.regex.blogsearch.application.usecase.blog;
 import com.regex.blogsearch.application.port.blog.BlogSearchOutboundPort;
 import com.regex.blogsearch.application.port.blog.BlogSearchUsecase;
 import com.regex.blogsearch.application.port.keyword.KeywordOutboundPort;
+import com.regex.blogsearch.dto.BlogSearchDTO;
 import com.regex.blogsearch.types.BlogSortType;
 import com.regex.blogsearch.domain.keyword.Keyword;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,10 @@ public class BlogSearchService implements BlogSearchUsecase {
     private final KeywordOutboundPort keywordOutboundPort;
     private final BlogSearchOutboundPort blogSearchOutboundPort;
 
+    @Override
     @Transactional
-    public String getBlogs(int page, int size, BlogSortType sort, String query) {
-        String responseBody = this.blogSearchOutboundPort.getBlogs(page, size, sort, query);
+    public BlogSearchDTO getBlogs(int page, int size, BlogSortType sort, String query) {
+        BlogSearchDTO responseBody = this.blogSearchOutboundPort.getBlogs(page, size, sort, query);
         this.updateSearchCount(query);
         return responseBody;
     };

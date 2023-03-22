@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class KakaoAPIResponseMeta {
     private Boolean is_end;
     private Integer pageable_count;
@@ -14,18 +15,20 @@ public class KakaoAPIResponseMeta {
 
     public static KakaoAPIResponseMeta fromNaverApiResponse(NaverAPIResponseBody naverAPIResponseBody) {
         boolean is_end;
-        int lastPage = Math.floorDiv(naverAPIResponseBody.getTotal(),naverAPIResponseBody.getDisplay());
-        if (lastPage == naverAPIResponseBody.getStart()) {
+        int start = naverAPIResponseBody.getStart();
+        int display = naverAPIResponseBody.getDisplay();
+        int total = naverAPIResponseBody.getTotal();
+        int lastPage = Math.floorDiv(total,display);
+        if (start + display > 1000) {
             is_end = true;
         }
         else {
             is_end = false;
         }
-
         return KakaoAPIResponseMeta.builder()
                 .is_end(is_end)
-                .total_count(naverAPIResponseBody.getTotal())
-                .pageable_count(lastPage <= 100 ? lastPage : 100)
+                .total_count(total)
+                .pageable_count(lastPage <= 1000 ? lastPage : 1000)
                 .build();
     }
 }

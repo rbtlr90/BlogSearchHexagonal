@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class BlogSearchDTO {
     private KakaoAPIResponseMeta meta;
-    private List<String> documents;
+    private List<?> documents;
 
     public static BlogSearchDTO fromKakaoApiResponse(KakaoAPIResponseBody kakaoAPIResponseBody) {
         return BlogSearchDTO.builder()
@@ -23,7 +23,10 @@ public class BlogSearchDTO {
                 .build();
     }
 
-//    public static BlogSearchDTO fromNaverApiResponse(NaverAPIResponseBody naverAPIResponseBody){
-//        return
-//    }
+    public static BlogSearchDTO fromNaverApiResponse(NaverAPIResponseBody naverAPIResponseBody){
+        return BlogSearchDTO.builder()
+                .meta(KakaoAPIResponseMeta.fromNaverApiResponse(naverAPIResponseBody))
+                .documents(naverAPIResponseBody.getItems())
+                .build();
+    }
 }

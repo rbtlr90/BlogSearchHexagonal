@@ -1,8 +1,11 @@
 package com.regex.blogsearch.adapter.api.blog;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.regex.blogsearch.application.port.blog.BlogSearchOutboundPort;
+import com.regex.blogsearch.dto.BlogSearchDTO;
 import com.regex.blogsearch.types.BlogSortType;
+import com.regex.blogsearch.types.KakaoAPIResponseBody;
+import com.regex.blogsearch.types.NaverAPIResponseBody;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,8 @@ public class BlogSearchAdapter implements BlogSearchOutboundPort {
 
     @Autowired
     private HttpHeaders httpHeaders;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Value("${kakaoRestAPIUrl}")
     private String kakaoRestAPIUrl;
     @Value("${kakaoRestAPIKey}")
@@ -36,7 +41,7 @@ public class BlogSearchAdapter implements BlogSearchOutboundPort {
     private String naverClientSecret;
 
 
-    public String getBlogs(int page, int size, BlogSortType sort, String query) {
+    public BlogSearchDTO getBlogs(int page, int size, BlogSortType sort, String query) {
         try {
             this.httpHeaders.set("Authorization", String.format("KakaoAK %s", this.kakaoRestAPIKey));
 
@@ -53,20 +58,40 @@ public class BlogSearchAdapter implements BlogSearchOutboundPort {
                     request,
                     String.class
             );
-            return kakaoBlogSearchResponse.getBody();
+            KakaoAPIResponseBody kakaoAPIResponseBody = KakaoAPIResponseBody.fromResponseEntity(
+                    kakaoBlogSearchResponse,
+                    this.objectMapper);
+            return BlogSearchDTO.fromKakaoApiResponse(kakaoAPIResponseBody);
         } catch (RestClientException kakaoRestException) {
             try {
                 log.error(kakaoRestException.getMessage());
+
+                HttpStatus statusCode = null;
+                if (kakaoRestException instanceof HttpClientErrorException) {
+                    HttpClientErrorException httpException = (HttpClientErrorException) kakaoRestException;
+                    statusCode = (HttpStatus) httpException.getStatusCode();
+                } else if (kakaoRestException instanceof HttpClientErrorException) {
+                    HttpServerErrorException httpException = (HttpServerErrorException) kakaoRestException;
+                    statusCode = (HttpStatus)  httpException.getStatusCode();
+                }
+                assert statusCode != null;
+                if (statusCode == HttpStatus.BAD_REQUEST) {
+                    throw new ConstraintViolationException(kakaoRestException.getMessage(), null);
+                }
+
                 ResponseEntity<String> naverBlogSearchResponse =
                         this.getNaverBlogApiResponse(page, size, sort, query);
-                return naverBlogSearchResponse.getBody();
+                NaverAPIResponseBody naverAPIResponseBody = NaverAPIResponseBody.fromResponseEntity(
+                        naverBlogSearchResponse,
+                        this.objectMapper
+                );
+                return BlogSearchDTO.fromNaverApiResponse(naverAPIResponseBody);
             } catch (RestClientException naverRestException) {
                 log.error(naverRestException.getMessage());
                 HttpStatus statusCode = null;
                 if (naverRestException instanceof HttpClientErrorException) {
                     HttpClientErrorException httpException = (HttpClientErrorException) naverRestException;
                     statusCode = (HttpStatus) httpException.getStatusCode();
-                    log.error(statusCode.toString());
                 } else if (naverRestException instanceof HttpClientErrorException) {
                     HttpServerErrorException httpException = (HttpServerErrorException) naverRestException;
                     statusCode = (HttpStatus)  httpException.getStatusCode();

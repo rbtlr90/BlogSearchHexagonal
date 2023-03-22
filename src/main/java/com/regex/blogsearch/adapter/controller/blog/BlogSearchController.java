@@ -1,6 +1,7 @@
 package com.regex.blogsearch.adapter.controller.blog;
 
 import com.regex.blogsearch.application.usecase.blog.BlogSearchService;
+import com.regex.blogsearch.dto.BlogSearchDTO;
 import com.regex.blogsearch.types.BlogSortType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -23,13 +24,13 @@ public class BlogSearchController {
     private final BlogSearchService blogSearchService;
 
     @GetMapping("/blogs")
-    public String getBlogsByKeyword(
+    public BlogSearchDTO getBlogsByKeyword(
             @Valid @RequestParam(defaultValue = "") @Size(min=1, message = "query field mandatory") final String query,
             @Valid @RequestParam(defaultValue = "1") @Min(value = 1, message = "page is lower than min") @Max(value = 50, message = "page is more than max") Integer page,
-            @Valid @RequestParam(defaultValue = "80") @Min(value = 1, message = "size is lower than min") @Max(value = 80, message = "size is more than max") Integer size,
+            @Valid @RequestParam(defaultValue = "50") @Min(value = 1, message = "size is lower than min") @Max(value = 50, message = "size is more than max") Integer size,
             @Valid @RequestParam(defaultValue = "accuracy") final BlogSortType sort
     ) {
-        String blogList = this.blogSearchService.getBlogs(
+        BlogSearchDTO blogList = this.blogSearchService.getBlogs(
                 page,
                 size,
                 sort,
