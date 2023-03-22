@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: Blog Search API
+  description: |-
+    This is an open source api server that searches blogs with a keyword using Open API.
+    
+    You can also use it with paging and sort.
+    
+    Additionally, the server provides most searched keywords list - maximum 10 keywords with searched count.
+  
+    
+    Source code link:
+    - [Github repository](https://github.com/rbtlr90/BlogSearchHexagonal)
+
+  contact:
+    email: rbtlr90@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: blog
+    description: Searching blog with keyword
+
+  - name: keyword
+    description: most searched keyword list
+
+paths:
+  /blogs:
+    get:
+      tags:
+        - blog
+      summary: get blog data fetch from Open API
+      description: get blog data from Open API. Initially try to get from kakao Open API, and try to naver Open API if kakao api has some problems.
+      operationId: getBlogsByKeyword
+      parameters:
+        - name: query
+          in: query
+          description: keyword to search
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: document count to get at once
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: page
+          in: query
+          description: start page to get data
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+            maximum: 50
+        - name: sort
+          in: query
+          description: sort kind. accuracy and recency provided
+          required: false
+          schema:
+            type: string
+            default: accuracy
+        
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogSearchDTO'
+        '400':
+          description: Invalid Request
+        '500':
+          description: Internal Server Error
+
+  /keyword/favorites:
+    get:
+      tags:
+        - keyword
+      summary: most searched keyword list
+      description: most searched keyword list, returns maximum 10 keywords with searched count
+      operationId: getMostSearchedKeywords
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeywordDTO'
+        '400':
+          description: Invalid Request
+        '500':
+          description: Internal Server Error
+
+components:
+  schemas:
+    Meta:
+      type: object
+      properties:
+        is_end:
+          type: boolean
+        pageable_count:
+          type: integer
+          format: int64
+          example: 100
+        total_count:
+          type: integer
+          format: int64
+          example: 1000
+    Documents:
+      type: string
+      format: json
+      example: "{'contents': ''}"
+    BlogSearchDTO:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/Meta'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Documents'
+    KeywordDTO:
+      type: object
+      properties:
+        keyword:
+          type: string
+          description: searched keyword
+          example: kakao
+        searchCount:
+          type: integer
+          format: int64
+          example: 100
