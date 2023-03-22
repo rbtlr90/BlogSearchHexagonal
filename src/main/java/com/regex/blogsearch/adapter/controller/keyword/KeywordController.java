@@ -18,18 +18,18 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping(path = "${apiPrefix}")
+@RequestMapping(path = "${apiPrefix}/keyword")
 @Validated
 public class KeywordController {
-    private final KeywordUsecase keywordInboundPort;
+    private final KeywordUsecase keywordUsecase;
 
-    @GetMapping("/keywords")
+    @GetMapping("/favorites")
     public List<KeywordDTO> getMostSearchedKeywords(
             @Valid @RequestParam(defaultValue = "1") int page,
             @Valid @RequestParam(defaultValue = "10") final int size,
             @Valid @RequestParam(defaultValue = "DESC") final KeywordSortOrder sortOrder
     ) {
         page = page - 1;
-        return this.keywordInboundPort.getMostSearchedKeywords(page, size, sortOrder);
+        return this.keywordUsecase.getMostSearchedKeywords(page, size, sortOrder);
     };
 }

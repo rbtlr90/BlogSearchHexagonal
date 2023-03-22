@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import static com.regex.blogsearch.exception.BlogSearchErrorCode.INTERNAL_SERVER_ERROR;
 import static com.regex.blogsearch.exception.BlogSearchErrorCode.INVALID_REQUEST;
@@ -33,6 +34,7 @@ public class BlogSearchExceptionHandler {
             HttpRequestMethodNotSupportedException.class,
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class,
+            MethodArgumentTypeMismatchException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BlogSearchErrorResponse handleBadRequest(
@@ -53,6 +55,7 @@ public class BlogSearchExceptionHandler {
     ) {
         log.error("url: {}, message: {}",
                 request.getRequestURI(), e.getMessage());
+        log.error(e.toString());
         return BlogSearchErrorResponse.builder()
                 .errorCode(INTERNAL_SERVER_ERROR)
                 .errorMessage(INTERNAL_SERVER_ERROR.getMessage())
